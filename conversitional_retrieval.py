@@ -14,7 +14,6 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 
 
-# -------- Step 1: Load & Split Documents --------
 def get_documents_from_web(url):
     loader = WebBaseLoader(url)
     docs = loader.load()
@@ -27,22 +26,19 @@ def get_documents_from_web(url):
     return split_docs
 
 
-# -------- Step 2: Create Vector Database --------
 def create_db(docs):
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vectorstore = FAISS.from_documents(docs, embedding=embeddings)
     return vectorstore
 
 
-# -------- Step 3: Create RAG Chain with History Awareness --------
 def create_chain(vectorstore):
     model = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
         model="llama-3.1-8b-instant",
         temperature=0.3
     )
-
-    # Prompt for the final document answering step
+    
     document_prompt = ChatPromptTemplate.from_template("""
     You are a helpful and friendly AI assistant. Use only the retrieved context to answer the user’s questions.
     If the context doesn’t contain relevant information, politely say you’re unsure. Respond in a natural, human-like,
@@ -65,7 +61,7 @@ def create_chain(vectorstore):
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
-    # History-aware retriever prompt (helps generate better context queries)
+    
     retriever_prompt = ChatPromptTemplate.from_messages([
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
@@ -78,7 +74,7 @@ def create_chain(vectorstore):
         prompt=retriever_prompt
     )
 
-    # Combine retriever + document chain
+    
     retrieval_chain = create_retrieval_chain(
         retriever=history_aware_retriever,
         combine_docs_chain=document_chain
@@ -87,7 +83,7 @@ def create_chain(vectorstore):
     return retrieval_chain
 
 
-# -------- Step 4: Chat Function --------
+
 def process_chat(chain, question, chat_history):
     response = chain.invoke({
         "input": question,
@@ -96,7 +92,7 @@ def process_chat(chain, question, chat_history):
     return response["answer"]
 
 
-# -------- Step 5: Run Chatbot --------
+
 if __name__ == '__main__':
     print("Loading website content, please wait...")
     docs = get_documents_from_web("https://datics.ai/")
@@ -243,5 +239,6 @@ if __name__ == '__main__':
 #         chat_history.append(HumanMessage(content=user_input))
 #         chat_history.append(AIMessage(content=response))
 #         print("Assistant:" , response)
+
 
 
