@@ -100,12 +100,12 @@ if __name__ == '__main__':
     chain = create_chain(vectorstore)
 
     chat_history = []
-    print("\n🤖 Chatbot ready! Start chatting (type 'exit' 'bye''quit' to stop)\n")
+    print("\n Chatbot ready! Start chatting (type 'exit' 'bye''quit' to stop)\n")
 
     while True:
         user_input = input("You: ")
         if user_input.lower() in ["exit", "bye", "quit"]:
-            print("Assistant: Goodbye! Have a great day! 👋")
+            print("Assistant: Goodbye! Have a great day!")
             break
 
         response = process_chat(chain, user_input, chat_history)
@@ -113,132 +113,3 @@ if __name__ == '__main__':
         chat_history.append(AIMessage(content=response))
 
         print("Assistant:", response)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# from dotenv import load_dotenv
-# load_dotenv()
-# import os
-# from langchain_groq import ChatGroq
-# from langchain_core.prompts import ChatPromptTemplate 
-# from langchain.chains.combine_documents import create_stuff_documents_chain
-# from langchain_community.document_loaders import WebBaseLoader
-# from langchain.text_splitter import RecursiveCharacterTextSplitter
-# from langchain_huggingface import HuggingFaceEmbeddings
-# from langchain_community.vectorstores.faiss import FAISS
-# from langchain.chains import create_retrieval_chain
-
-# from langchain_core.messages import HumanMessage, AIMessage
-# from langchain_core.prompts import MessagesPlaceholder
-# from langchain.chains.history_aware_retriever import create_history_aware_retriever
-
-# # Load environment variables
-
-
-
-# # -------- Step 1: Load & Split Documents --------
-# def get_documents_from_web(url):
-#     loader = WebBaseLoader(url)
-#     docs = loader.load()
-
-#     splitter = RecursiveCharacterTextSplitter(
-#         chunk_size=200,
-#         chunk_overlap=20
-#     )
-#     split_docs = splitter.split_documents(docs)
-#     return split_docs
-
-
-# # -------- Step 2: Create Vector Database --------
-# def create_db(docs):
-#     # Use open-source embeddings instead of OpenAI
-#     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-#     vectorstore = FAISS.from_documents(docs, embedding=embeddings)
-#     return vectorstore
-
-
-# # -------- Step 3: Create RAG Chain --------
-# def create_chain(vectorstore):
-#     model = ChatGroq(
-#         groq_api_key=os.getenv("GROQ_API_KEY"),
-#         model="llama-3.1-8b-instant",  # or mixtral-8x7b-32768
-#         temperature=0.4
-#     )
-
-#     prompt = ChatPromptTemplate.from_template("""
-#     Answer the user's question based only on the following context.
-#     Context: {context}
-#     Question: {input}
-#     """)
-
-#     # Combine docs + model
-#     chain = create_stuff_documents_chain(
-#         llm=model,
-#         prompt=prompt
-#     )
-
-#     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-
-#     retriever_prompt = ChatPromptTemplate.from_messages([
-#         MessagesPlaceholder(variable_name="chat_history"),
-#         ("human", "{input}"),
-#         ("human","Given the above conversition, generate a search query to lookk up in order to get information relevent to the conversition ")
-#     ])
-
-#     history_aware_retriever = create_history_aware_retriever(
-#         llm=model,
-#         retriever=retriever,
-#         prompt=retriever_prompt
-#     )
-#     retrieval_chain = create_retrieval_chain(
-#         # retriever ,
-#         history_aware_retriever,
-#         chain
-#     )
-
-#     return retrieval_chain
-
-
-
-# def process_chat(chain , question ,chat_history):
-#     response = chain.invoke({
-#     "input": question,
-#     "chat_history": chat_history
-#     })
-#     return(response["answer"])
-
-# # -------- Step 4: Run the RAG Pipeline --------
-# if __name__ == '__main__':
-#     docs = (get_documents_from_web('https://datics.ai/'))
-#     vectorstore = create_db(docs)
-#     chain = create_chain(vectorstore)
-
-#     chat_history = []
-
-#     while True:
-#         user_input = input("You: ")
-#         if user_input.lower() in ["exit" , "bye" , "quit"]:
-#             print("Assistant: Goodbye! Have a great day!")
-#             break
-#         response = process_chat(chain, user_input , chat_history)
-#         chat_history.append(HumanMessage(content=user_input))
-#         chat_history.append(AIMessage(content=response))
-#         print("Assistant:" , response)
-
-
-
