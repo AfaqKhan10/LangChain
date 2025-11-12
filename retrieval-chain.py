@@ -11,7 +11,6 @@ from langchain.chains import create_retrieval_chain
 
 load_dotenv()
 
-
 def get_documents_from_web(url):
     loader = WebBaseLoader(url)
     docs = loader.load()
@@ -24,9 +23,7 @@ def get_documents_from_web(url):
     return split_docs
 
 
-
 def create_db(docs):
-    # Use open-source embeddings instead of OpenAI
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vectorstore = FAISS.from_documents(docs, embedding=embeddings)
     return vectorstore
@@ -35,7 +32,7 @@ def create_db(docs):
 def create_chain(vectorstore):
     model = ChatGroq(
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        model="llama-3.1-8b-instant",  # or mixtral-8x7b-32768
+        model="llama-3.1-8b-instant",
         temperature=0.4
     )
 
@@ -67,5 +64,6 @@ chain = create_chain(vectorstore)
 
 response = chain.invoke({"input": "Tell something about datics"})
 print(response["context"])
+
 
 
